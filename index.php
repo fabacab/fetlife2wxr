@@ -24,6 +24,15 @@
         </p>
     </fieldset>
     <input type="submit" name="submit" value="Connect to FetLife and make my WXR file" />
+<script type="text/javascript">
+// Be nice to the new users.
+var theform = document.getElementById('fetlife2wxr-form');
+theform.addEventListener('submit', function () {
+    var btn = theform.querySelector('[type="submit"]');
+    btn.setAttribute('disabled', 'disabled');
+    btn.value = 'Working.... Please be patient!';
+});
+</script>
 </form>
 </body>
 </html>
