@@ -160,6 +160,29 @@ END_USAGE;
                     $this->wxr->writeCData($v);
                     $this->wxr->endElement();
                     break;
+                case '_comments':
+                    foreach ($v as $comment) {
+                        $this->addComment($comment);
+                    }
+                    break;
+                default:
+                    $this->wxr->writeElement($k, $v);
+                    break;
+            }
+        }
+        $this->wxr->endElement();
+    }
+
+    function addComment ($info) {
+        $this->wxr->startElement('wp:comment');
+        foreach ($info as $k => $v) {
+            switch ($k) {
+                case 'wp:comment_author':
+                case 'wp:comment_content':
+                    $this->wxr->startElement($k);
+                    $this->wxr->writeCData($v);
+                    $this->wxr->endElement();
+                    break;
                 default:
                     $this->wxr->writeElement($k, $v);
                     break;
@@ -224,6 +247,25 @@ foreach ($fl_writings as $writing) {
     }
 
     // and extract the posts, too.
+    $writing->populate(); // Fetch ALL the things!
+    // Prepare the comments. We'll attach these to the post in just a moment.
+    $comments = array();
+    foreach ($writing->comments as $comment) {
+        $comments[] = array(
+            'wp:comment_id' => $comment->id,
+            'wp:comment_author' => $comment->creator->nickname,
+            'wp:comment_author_email' => '',
+            'wp:comment_author_url' => $comment->creator->getPermalink(),
+            'wp:comment_author_IP' => '',
+            'wp:comment_date' => date('Y-m-d H:i:s', strtotime($comment->dt_published)),
+            'wp:comment_date_gmt' => date('Y-m-d H:i:s', strtotime($comment->dt_published)),
+            'wp:comment_content' => $comment->getContentHtml(),
+            'wp:comment_approved' => 1, // Comments are always approved.
+            'wp:comment_type' => '',
+            'wp:comment_parent' => 0,
+            'wp:comment_user_id' => 0
+        );
+    }
     $posts[] = array(
         'title' => $writing->title,
         'link' => $writing->getPermalink(),
@@ -245,7 +287,8 @@ foreach ($fl_writings as $writing) {
                 'nicename' => strtolower(str_replace(' ', '-', $writing->category))
             ),
             'contents' => $writing->category
-        )
+        ),
+        '_comments' => $comments
     );
 }
 
