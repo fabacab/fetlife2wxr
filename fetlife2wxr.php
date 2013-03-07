@@ -233,7 +233,7 @@ foreach ($fl_writings as $writing) {
             'attrs' => array('isPermaLink' => 'true'),
             'contents' => $writing->getPermalink()
         ),
-        'content:encoded' => $writing->getBodyHtml(),
+        'content:encoded' => $writing->getContentHtml(),
         'wp:post_id' => $writing->id,
         'wp:post_date' => date('Y-m-d H:i:s', strtotime($writing->dt_published)),
         'wp:post_name' => strtolower(str_replace(' ', '-', $writing->title)),
