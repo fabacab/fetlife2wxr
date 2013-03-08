@@ -2,7 +2,7 @@
 /**
  * This program creates a WordPress Extended RSS (WXR) file for a given FetLife
  * user. The resulting file can be used to import a FetLife user's content to
- * any WordPress blog, notably those on WordPres.com.
+ * any WordPress blog, notably those on WordPress.com.
  *
  * PHP version 5
  *
@@ -213,11 +213,13 @@ $FL->logIn() or die("Could not log in to FetLife. Last HTML received was:<br />{
 // And deal with timezone headaches. :P
 date_default_timezone_set('UTC');
 
-// Fetch all Writings.
-$fl_writings = $FL->getWritingsOf($FL->id);
+$whose = $FL->id;
+$fl_writings = $FL->getWritingsOf($whose);
+$fl_pictures = $FL->getPicturesOf($whose);
 
 $cats = array();
 $posts = array();
+// Prepare FetLife Writings as WordPress posts.
 foreach ($fl_writings as $writing) {
     // Extract all the categories we found
     if ($writing->category && (false === in_array($writing->category, $cats)) ) {
@@ -288,6 +290,46 @@ foreach ($fl_writings as $writing) {
             ),
             'contents' => $writing->category
         ),
+        '_comments' => $comments
+    );
+}
+// Prepare FetLife Pictures as WordPress attachment pages.
+foreach ($fl_pictures as $picture) {
+    $picture->populate();
+    $comments = array();
+    foreach ($picture->comments as $comment) {
+        $comments[] = array(
+            'wp:comment_id' => $comment->id,
+            'wp:comment_author' => $comment->creator->nickname,
+            'wp:comment_author_email' => '',
+            'wp:comment_author_url' => $comment->creator->getPermalink(),
+            'wp:comment_author_IP' => '',
+            'wp:comment_date' => date('Y-m-d H:i:s', strtotime($comment->dt_published)),
+            'wp:comment_date_gmt' => date('Y-m-d H:i:s', strtotime($comment->dt_published)),
+            'wp:comment_content' => $comment->getContentHtml(),
+            'wp:comment_approved' => 1, // Comments are always approved.
+            'wp:comment_type' => '',
+            'wp:comment_parent' => 0,
+            'wp:comment_user_id' => 0
+        );
+    }
+    $posts[] = array(
+        'title' => strip_tags($picture->getContentHtml()),
+        'link' => $picture->getPermalink(),
+        'pubDate' => date("D, d M Y H:i:s e", strtotime($picture->dt_published)),
+        'dc:creator' => $FL->nickname, // NOTE: This is the user doing the export.
+        'guid' => array(
+            'attrs' => array('isPermaLink' => 'true'),
+            'contents' => $picture->getPermalink()
+        ),
+        'content:encoded' => $picture->getContentHtml(),
+        'wp:post_id' => $picture->id,
+        'wp:post_date' => date('Y-m-d H:i:s', strtotime($picture->dt_published)),
+        'wp:post_name' => strtolower(str_replace(' ', '-', strip_tags($picture->getContentHtml()))),
+        'wp:status' => 'publish',
+        'wp:post_type' => 'attachment',
+        'wp:attachment_url' => $picture->src,
+        //'wp:post_meta' => array(), // TODO: Do we need this?
         '_comments' => $comments
     );
 }
