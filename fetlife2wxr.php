@@ -201,7 +201,9 @@ if (empty($_POST['fl_nickname']) || empty($_POST['fl_password'])) {
     die('Please use the <a href="' . dirname($_SERVER['PHP_SELF']) . '">FetLife to WXR generator page</a>.');
 }
 $FL = new FetLifeUser($_POST['fl_nickname'], $_POST['fl_password']);
-if ($_POST['fl_proxyurl']) {
+if ('auto' === $_POST['fl_proxyurl']) {
+    $FL->connection->setProxy('auto');
+} else if ($_POST['fl_proxyurl']) {
     $p = parse_url($_POST['fl_proxyurl']);
     $FL->connection->setProxy(
         "{$p['host']}:{$p['port']}",

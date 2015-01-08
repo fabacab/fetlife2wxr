@@ -17,7 +17,7 @@
             <input type="password" id="fl_password" name="fl_password" placeholder="Enter your FetLife password" />
         </p>
     </fieldset>
-    <fieldset><legend>If you need to use a proxy to connect to FetLife, enter its URL here. Otherwise, leave this blank to make a direct connection.</legend>
+    <fieldset><legend>If you need to use a proxy to connect to FetLife, enter its URL here. Otherwise, leave this blank to make a direct connection. Use the special value <kbd>auto</kbd> to automatically configure a proxy.</legend>
         <p>
             <label for="fl_proxyurl">Proxy URL</label>
             <input id="fl_proxyurl" name="fl_proxyurl" placeholder="http://proxy.example.com:8080" />
